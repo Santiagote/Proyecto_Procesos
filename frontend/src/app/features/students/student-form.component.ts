@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { StudentService } from '@core/services/student.service';
 import { Career } from '@core/models/student.model';
+import { finalize } from 'rxjs';
 
 @Component({
   selector: 'app-student-form',
@@ -37,10 +38,13 @@ import { Career } from '@core/models/student.model';
             </div>
             <div class="col-md-4">
               <label class="form-label">Carrera *</label>
-              <select class="form-select" [(ngModel)]="form.career_id" name="career_id" required>
-                <option value="">Seleccionar...</option>
-                <option *ngFor="let c of careers" [value]="c.id">{{ c.name }}</option>
+              <select class="form-select" [(ngModel)]="form.career_id" name="career_id" required [disabled]="careersLoading">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let c of careers" [ngValue]="c.id">{{ c.name || c.nombre || c.code || c.codigo || ('Carrera ' + c.id) }}</option>
               </select>
+              <small *ngIf="!careersLoading && careers.length === 0" class="text-muted">
+                No hay carreras disponibles para seleccionar.
+              </small>
             </div>
             <div class="col-md-4">
               <label class="form-label">Nivel *</label>
@@ -70,11 +74,12 @@ export class StudentFormComponent implements OnInit {
   loading = false;
   error = '';
   careers: Career[] = [];
+  careersLoading = true;
   selectedFile: File | null = null;
 
   form = {
     cedula: '', nombres: '', apellidos: '', email: '',
-    telefono: '', career_id: 0, nivel: 1,
+    telefono: '', career_id: null as number | null, nivel: 1,
   };
 
   constructor(
@@ -89,7 +94,19 @@ export class StudentFormComponent implements OnInit {
   }
 
   ngOnInit(): void {
-    this.studentService.getCareers().subscribe(c => this.careers = c);
+    this.studentService.getCareers()
+      .pipe(finalize(() => this.careersLoading = false))
+      .subscribe({
+        next: (c) => this.careers = c,
+        error: (err) => {
+          if (err && err.status === 401) {
+            this.error = 'Necesitas iniciar sesión para ver las carreras. Por favor, inicia sesión.';
+          } else {
+            this.error = 'Error cargando carreras.';
+          }
+          this.careers = [];
+        }
+      });
     if (this.isEdit && this.studentId) {
       this.studentService.getStudent(this.studentId).subscribe(s => {
         this.form.cedula = s.user.cedula;
@@ -116,7 +133,7 @@ export class StudentFormComponent implements OnInit {
     this.loading = true;
     this.error = '';
     const fd = new FormData();
-    Object.entries(this.form).forEach(([k, v]) => fd.append(k, String(v)));
+    Object.entries(this.form).forEach(([k, v]) => fd.append(k, String(v ?? '')));
     if (this.selectedFile) fd.append('reference_image', this.selectedFile);
 
     const obs = this.isEdit

@@ -8,6 +8,23 @@ interface PaginatedResponse<T> {
   results: T[];
 }
 
+interface CareerApiItem {
+  id?: number;
+  career_id?: number;
+  id_carrera?: number;
+  name?: string;
+  nombre?: string;
+  code?: string;
+  codigo?: string;
+}
+
+interface CareerApiResponse {
+  results?: CareerApiItem[];
+  data?: CareerApiItem[];
+  careers?: CareerApiItem[];
+  items?: CareerApiItem[];
+}
+
 @Injectable({ providedIn: 'root' })
 export class StudentService {
   private baseUrl = `${environment.apiUrl}/students`;
@@ -52,7 +69,29 @@ export class StudentService {
 
   getCareers(): Observable<Career[]> {
     return this.http.get<Career[] | PaginatedResponse<Career>>(`${this.baseUrl}/careers/`).pipe(
-      map(response => Array.isArray(response) ? response : response.results)
+      map(response => {
+        const careers = Array.isArray(response)
+          ? response
+          : (response as CareerApiResponse).results
+            ?? (response as CareerApiResponse).data
+            ?? (response as CareerApiResponse).careers
+            ?? (response as CareerApiResponse).items
+            ?? [];
+
+        return careers
+          .map(career => {
+            const rawCareer = career as CareerApiItem & Career;
+
+            return {
+              id: rawCareer.id ?? rawCareer.career_id ?? rawCareer.id_carrera ?? 0,
+              name: rawCareer.name ?? rawCareer.nombre ?? rawCareer.code ?? rawCareer.codigo ?? '',
+              code: rawCareer.code ?? rawCareer.codigo ?? '',
+              nombre: rawCareer.nombre,
+              codigo: rawCareer.codigo,
+            };
+          })
+          .filter(career => career.id > 0 && career.name.trim().length > 0);
+      })
     );
   }
 

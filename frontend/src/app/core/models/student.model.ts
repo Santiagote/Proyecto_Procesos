@@ -2,6 +2,8 @@ export interface Career {
   id: number;
   name: string;
   code: string;
+  nombre?: string;
+  codigo?: string;
 }
 
 export interface Subject {
