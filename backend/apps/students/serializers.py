@@ -7,6 +7,9 @@ class CareerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Career
         fields = "__all__"
+        extra_kwargs = {
+            "code": {"required": False},
+        }
 
 
 class SubjectSerializer(serializers.ModelSerializer):

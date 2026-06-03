@@ -12,7 +12,7 @@ import { Career } from '@core/models/student.model';
       <div class="card-body">
         <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
-        <form (ngSubmit)="onSubmit()">
+        <form #studentForm="ngForm" (ngSubmit)="onSubmit(studentForm)">
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label">Cédula *</label>
@@ -29,7 +29,7 @@ import { Career } from '@core/models/student.model';
             <div class="col-md-4">
               <label class="form-label">Email *</label>
               <input type="email" class="form-control" [(ngModel)]="form.email" name="email" required
-                     [attr.readonly]="isEdit">
+                     [readonly]="isEdit">
             </div>
             <div class="col-md-4">
               <label class="form-label">Teléfono</label>
@@ -53,7 +53,7 @@ import { Career } from '@core/models/student.model';
           </div>
 
           <div class="mt-4">
-            <button type="submit" class="btn btn-sacarf me-2" [disabled]="loading">
+            <button type="submit" class="btn btn-sacarf me-2" [disabled]="loading || studentForm.invalid">
               <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
               {{ isEdit ? 'Actualizar' : 'Registrar' }} Estudiante
             </button>
@@ -107,7 +107,12 @@ export class StudentFormComponent implements OnInit {
     this.selectedFile = event.target.files[0] || null;
   }
 
-  onSubmit(): void {
+  onSubmit(studentForm: any): void {
+    if (studentForm.invalid) {
+      this.error = 'Completa los campos obligatorios antes de guardar.';
+      return;
+    }
+
     this.loading = true;
     this.error = '';
     const fd = new FormData();

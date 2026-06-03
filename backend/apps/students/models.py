@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils.text import slugify
 from apps.accounts.models import User
 
 
@@ -9,6 +10,24 @@ class Career(models.Model):
     class Meta:
         verbose_name = "Carrera"
         verbose_name_plural = "Carreras"
+
+    def _generate_code(self):
+        base_code = "".join(character for character in slugify(self.name).upper() if character.isalnum())[:10]
+        if not base_code:
+            base_code = "CAREER"
+
+        code = base_code
+        suffix = 1
+        while Career.objects.exclude(pk=self.pk).filter(code=code).exists():
+            suffix_text = str(suffix)
+            code = f"{base_code[:10 - len(suffix_text)]}{suffix_text}"
+            suffix += 1
+        return code
+
+    def save(self, *args, **kwargs):
+        if not self.code:
+            self.code = self._generate_code()
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return self.name

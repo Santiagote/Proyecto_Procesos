@@ -32,9 +32,20 @@ def create_collection():
 def index_face(image_url, student_id):
     client = get_rekognition_client()
     try:
-        import requests
-        response = requests.get(image_url, timeout=10)
-        image_bytes = response.content
+        # Extraer bucket y key desde la URL
+        from django.conf import settings
+        import boto3
+        s3 = boto3.client(
+            "s3",
+            region_name=settings.AWS_REGION,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        )
+        # Parsear key desde la URL
+        key = image_url.split(f"{settings.AWS_S3_BUCKET_NAME}.s3.{settings.AWS_REGION}.amazonaws.com/")[1]
+        
+        s3_obj = s3.get_object(Bucket=settings.AWS_S3_BUCKET_NAME, Key=key)
+        image_bytes = s3_obj["Body"].read()
 
         result = client.index_faces(
             CollectionId=settings.AWS_REKOGNITION_COLLECTION_ID,
