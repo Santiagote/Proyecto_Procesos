@@ -48,7 +48,10 @@ export class RecoverPasswordComponent {
         this.success = 'Si el correo existe, recibirás instrucciones para recuperar tu contraseña';
         this.loading = false;
       },
-      error: err => { this.error = err.message; this.loading = false; },
+      error: err => {
+        this.error = err?.error?.detail || err?.message || 'No se pudo enviar el correo de recuperación';
+        this.loading = false;
+      },
     });
   }
 }

@@ -2,7 +2,7 @@ import logging
 from django.conf import settings
 from django.utils import timezone
 import boto3
-from botocore.exceptions import ClientError
+from botocore.exceptions import BotoCoreError, ClientError
 
 logger = logging.getLogger(__name__)
 
@@ -29,7 +29,7 @@ def _send_email(to_email, subject, body_html):
         )
         logger.info(f"Correo enviado a {to_email}: {subject}")
         return True
-    except ClientError as e:
+    except (ClientError, BotoCoreError) as e:
         logger.error(f"Error enviando correo a {to_email}: {e}")
         return False
 

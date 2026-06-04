@@ -51,7 +51,11 @@ class AuthViewSet(GenericViewSet):
             user = User.objects.get(email=serializer.validated_data["email"])
             token = PasswordService.generate_recovery_token(user)
             from cloud.ses import send_recovery_email
-            send_recovery_email(user.email, token)
+            if not send_recovery_email(user.email, token):
+                return Response(
+                    {"detail": "No se pudo enviar el correo de recuperación. Revisa la configuración de SES."},
+                    status=status.HTTP_502_BAD_GATEWAY,
+                )
         except User.DoesNotExist:
             pass
         return Response({"detail": "Si el correo existe, recibirás instrucciones para recuperar tu contraseña"})
