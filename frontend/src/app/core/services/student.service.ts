@@ -1,9 +1,9 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, map } from 'rxjs';
+import { Observable, of } from 'rxjs';
+import { map, catchError } from 'rxjs/operators';
 import { environment } from '@env/environment';
 import { Student, StudentCreateRequest, Career, Subject, StudentSubject } from '@core/models/student.model';
-
 interface PaginatedResponse<T> {
   results: T[];
 }
@@ -68,30 +68,16 @@ export class StudentService {
   }
 
   getCareers(): Observable<Career[]> {
-    return this.http.get<Career[] | PaginatedResponse<Career>>(`${this.baseUrl}/careers/`).pipe(
+    return this.http.get<any>(`${this.baseUrl}/careers/`).pipe(
       map(response => {
-        const careers = Array.isArray(response)
-          ? response
-          : (response as CareerApiResponse).results
-            ?? (response as CareerApiResponse).data
-            ?? (response as CareerApiResponse).careers
-            ?? (response as CareerApiResponse).items
-            ?? [];
-
-        return careers
-          .map(career => {
-            const rawCareer = career as CareerApiItem & Career;
-
-            return {
-              id: rawCareer.id ?? rawCareer.career_id ?? rawCareer.id_carrera ?? 0,
-              name: rawCareer.name ?? rawCareer.nombre ?? rawCareer.code ?? rawCareer.codigo ?? '',
-              code: rawCareer.code ?? rawCareer.codigo ?? '',
-              nombre: rawCareer.nombre,
-              codigo: rawCareer.codigo,
-            };
-          })
-          .filter(career => career.id > 0 && career.name.trim().length > 0);
-      })
+        const list = Array.isArray(response) ? response : (response?.results ?? []);
+        return list.map((c: any) => ({
+          id: c.id ?? 0,
+          name: c.name ?? c.nombre ?? '',
+          code: c.code ?? c.codigo ?? '',
+        })).filter((c: any) => c.id > 0 && c.name.trim().length > 0);
+      }),
+      catchError(() => of([]))
     );
   }
 
