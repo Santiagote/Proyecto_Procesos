@@ -16,7 +16,7 @@ import { AuthService } from '@core/services/auth.service';
 
         <form (ngSubmit)="onSubmit()" *ngIf="!success">
           <div class="mb-3">
-            <label class="form-label">Correo institucional</label>
+            <label class="form-label">Correo electrónico</label>
             <input type="email" class="form-control" [(ngModel)]="email" name="email" required>
           </div>
           <button type="submit" class="btn btn-sacarf w-100" [disabled]="loading">

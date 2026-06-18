@@ -18,10 +18,15 @@ class AuthService:
             return None
 
         if not user.is_active:
-            return None
+            raise Exception("Tu cuenta está desactivada. Contacta al administrador.")
 
         if user.blocked_until and user.blocked_until > timezone.now():
-            raise Exception(f"Cuenta bloqueada hasta {user.blocked_until}")
+            minutos_restantes = int((user.blocked_until - timezone.now()).total_seconds() / 60) + 1
+            raise Exception(f"Cuenta bloqueada. Intenta nuevamente en {minutos_restantes} minuto(s).")
+        if user.blocked_until and user.blocked_until <= timezone.now():
+            user.blocked_until = None
+            user.failed_login_attempts = 0
+            user.save(update_fields=["failed_login_attempts", "blocked_until"])
 
         if user.check_password(password):
             user.failed_login_attempts = 0
@@ -31,8 +36,11 @@ class AuthService:
             user.failed_login_attempts += 1
             if user.failed_login_attempts >= settings.MAX_LOGIN_ATTEMPTS:
                 user.blocked_until = timezone.now() + timedelta(minutes=settings.ACCOUNT_BLOCK_MINUTES)
+                user.save(update_fields=["failed_login_attempts", "blocked_until"])
+                raise Exception(f"Cuenta bloqueada por {settings.ACCOUNT_BLOCK_MINUTES} minutos por demasiados intentos fallidos.")
             user.save(update_fields=["failed_login_attempts", "blocked_until"])
-            return None
+            intentos_restantes = settings.MAX_LOGIN_ATTEMPTS - user.failed_login_attempts
+            raise Exception(f"Credenciales inválidas. Te quedan {intentos_restantes} intento(s) antes de que tu cuenta sea bloqueada.")
 
     @staticmethod
     def get_tokens_for_user(user):
@@ -70,10 +78,11 @@ class UserService:
         user = User(**data)
         user.set_password(password)
         user.password_change_required = True
+        user.is_active = False
         user.save()
         PasswordHistory.objects.create(user=user, password_hash=user.password)
-        from cloud.ses import send_credentials_email
-        send_credentials_email(user.email, password)
+        from apps.accounts.activation import enviar_correo_activacion
+        enviar_correo_activacion(user, password)
         return user
 
     @staticmethod

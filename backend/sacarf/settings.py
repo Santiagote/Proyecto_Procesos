@@ -171,3 +171,8 @@ LOGGING = {
     "handlers": {"console": {"class": "logging.StreamHandler"}},
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+# Brevo (emails)
+BREVO_API_KEY = os.environ.get("BREVO_API_KEY", "")
+BREVO_SOURCE_EMAIL = os.environ.get("BREVO_SOURCE_EMAIL", "")
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "http://localhost:4200")

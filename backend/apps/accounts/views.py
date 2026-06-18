@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework.views import APIView
 from rest_framework.mixins import CreateModelMixin, RetrieveModelMixin, UpdateModelMixin
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.throttling import UserRateThrottle
@@ -26,7 +27,7 @@ class AuthViewSet(GenericViewSet):
         try:
             user = AuthService.authenticate(serializer.validated_data["email"], serializer.validated_data["password"])
         except Exception as e:
-            return Response({"detail": str(e)}, status=status.HTTP_423_LOCKED)
+            return Response({"detail": str(e)}, status=status.HTTP_401_UNAUTHORIZED)
         if not user:
             return Response({"detail": "Credenciales inválidas"}, status=status.HTTP_401_UNAUTHORIZED)
         tokens = AuthService.get_tokens_for_user(user)
@@ -100,7 +101,7 @@ class AuthViewSet(GenericViewSet):
 
 
 class UserViewSet(ModelViewSet):
-    queryset = User.objects.all()
+    queryset = User.objects.exclude(role='STUDENT')
     permission_classes = [IsAuthenticated, IsAdmin]
 
     def get_serializer_class(self):
@@ -129,3 +130,15 @@ class UserViewSet(ModelViewSet):
             return Response(UserSerializer(user).data)
         except Exception as e:
             return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+from .activation import activar_cuenta
+
+class ActivateAccountView(APIView):
+    permission_classes = []
+
+    def get(self, request, token):
+        user, error = activar_cuenta(token)
+        if error:
+            return Response({"detail": error}, status=status.HTTP_400_BAD_REQUEST)
+        return Response({"detail": "Cuenta activada correctamente."}, status=status.HTTP_200_OK)

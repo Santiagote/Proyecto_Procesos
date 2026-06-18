@@ -37,6 +37,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     failed_login_attempts = models.IntegerField(default=0, verbose_name="Intentos fallidos")
     blocked_until = models.DateTimeField(null=True, blank=True, verbose_name="Bloqueado hasta")
     profile_picture = models.URLField(blank=True, verbose_name="Foto de perfil")
+    is_verified = models.BooleanField(default=False, verbose_name="Cuenta verificada")
     date_joined = models.DateTimeField(auto_now_add=True, verbose_name="Fecha de registro")
 
     objects = UserManager()
@@ -89,3 +90,15 @@ class AuditLog(models.Model):
         verbose_name = "Registro de auditoría"
         verbose_name_plural = "Registros de auditoría"
         ordering = ["-created_at"]
+
+
+class AccountActivationToken(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="activation_token")
+    token = models.CharField(max_length=255, unique=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    expires_at = models.DateTimeField()
+    is_used = models.BooleanField(default=False)
+
+    class Meta:
+        verbose_name = "Token de activación"
+        verbose_name_plural = "Tokens de activación"

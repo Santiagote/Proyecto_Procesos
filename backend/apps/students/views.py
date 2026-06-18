@@ -3,6 +3,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import IsAuthenticated
+from django.db import IntegrityError
 from .models import Student, Career, Subject, StudentSubject
 from .serializers import (
     StudentSerializer, StudentCreateSerializer, StudentUpdateSerializer,
@@ -48,15 +49,51 @@ class StudentViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = StudentCreateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
-        student = StudentService.create_student(serializer.validated_data)
-        return Response(StudentSerializer(student).data, status=status.HTTP_201_CREATED)
+        try:
+            student = StudentService.create_student(serializer.validated_data)
+            return Response(StudentSerializer(student).data, status=status.HTTP_201_CREATED)
+        except IntegrityError as e:
+            error_str = str(e)
+            if 'cedula' in error_str:
+                return Response(
+                    {"detail": "Ya existe un estudiante registrado con esa cédula."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif 'email' in error_str:
+                return Response(
+                    {"detail": "Ya existe un usuario registrado con ese correo electrónico."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {"detail": "Ya existe un estudiante con esos datos. Verifica la cédula y el correo."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+        except ValueError as e:
+            return Response({"detail": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
     def update(self, request, *args, **kwargs):
         instance = self.get_object()
         serializer = StudentUpdateSerializer(data=request.data, partial=True)
         serializer.is_valid(raise_exception=True)
-        student = StudentService.update_student(instance, serializer.validated_data)
-        return Response(StudentSerializer(student).data)
+        try:
+            student = StudentService.update_student(instance, serializer.validated_data)
+            return Response(StudentSerializer(student).data)
+        except IntegrityError as e:
+            error_str = str(e)
+            if 'cedula' in error_str:
+                return Response(
+                    {"detail": "Ya existe un estudiante con esa cédula."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            elif 'email' in error_str:
+                return Response(
+                    {"detail": "Ya existe un usuario con ese correo electrónico."},
+                    status=status.HTTP_400_BAD_REQUEST
+                )
+            return Response(
+                {"detail": "Error de datos duplicados. Verifica la información ingresada."},
+                status=status.HTTP_400_BAD_REQUEST
+            )
 
     @action(detail=False, methods=["get"])
     def search(self, request):

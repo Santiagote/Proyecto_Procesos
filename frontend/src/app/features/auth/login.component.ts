@@ -17,14 +17,19 @@ import { AuthService } from '@core/services/auth.service';
 
         <form (ngSubmit)="onLogin()">
           <div class="mb-3">
-            <label class="form-label">Correo institucional</label>
+            <label class="form-label">Correo electrónico</label>
             <input type="email" class="form-control" [(ngModel)]="email" name="email"
                    placeholder="correo@unl.edu.ec" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Contraseña</label>
-            <input type="password" class="form-control" [(ngModel)]="password" name="password"
-                   placeholder="Ingresa tu contraseña" required>
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="password" name="password"
+                     placeholder="Ingresa tu contraseña" required>
+              <button type="button" class="btn btn-outline-secondary" (click)="showPassword=!showPassword">
+                <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn btn-sacarf w-100 mb-3" [disabled]="loading">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
@@ -45,6 +50,7 @@ export class LoginComponent {
   password = '';
   loading = false;
   error = '';
+  showPassword = false;
 
   constructor(private authService: AuthService, private router: Router) {}
 
