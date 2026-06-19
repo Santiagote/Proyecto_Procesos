@@ -3,27 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '@env/environment';
-import { Student, StudentCreateRequest, Career, Subject, StudentSubject } from '@core/models/student.model';
-interface PaginatedResponse<T> {
-  results: T[];
-}
-
-interface CareerApiItem {
-  id?: number;
-  career_id?: number;
-  id_carrera?: number;
-  name?: string;
-  nombre?: string;
-  code?: string;
-  codigo?: string;
-}
-
-interface CareerApiResponse {
-  results?: CareerApiItem[];
-  data?: CareerApiItem[];
-  careers?: CareerApiItem[];
-  items?: CareerApiItem[];
-}
+import { Student, Career, Subject, StudentSubject } from '@core/models/student.model';
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
@@ -82,6 +62,8 @@ export class StudentService {
   }
 
   getSubjects(): Observable<Subject[]> {
-    return this.http.get<Subject[]>(`${this.baseUrl}/subjects/`);
+    return this.http.get<any>(`${this.baseUrl}/subjects/`).pipe(
+      map(res => res.results ?? res)
+    );
   }
 }

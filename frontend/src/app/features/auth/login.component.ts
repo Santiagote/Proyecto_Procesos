@@ -8,9 +8,9 @@ import { AuthService } from '@core/services/auth.service';
     <div class="login-page">
       <div class="login-card">
         <div class="brand">
-          <i class="bi bi-camera-fill" style="font-size:3rem;color:#1a237e;"></i>
+          <i class="bi bi-camera-fill"></i>
           <h2>SACARF</h2>
-          <p>Sistema de Control de Asistencia</p>
+          <p>Sistema de Control de Asistencia por Reconocimiento Facial</p>
         </div>
 
         <div *ngIf="error" class="alert alert-danger py-2 small">{{ error }}</div>
@@ -18,13 +18,19 @@ import { AuthService } from '@core/services/auth.service';
         <form (ngSubmit)="onLogin()">
           <div class="mb-3">
             <label class="form-label">Correo institucional</label>
-            <input type="email" class="form-control" [(ngModel)]="email" name="email"
-                   placeholder="correo@unl.edu.ec" required>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+              <input type="email" class="form-control" [(ngModel)]="email" name="email"
+                     placeholder="correo@unl.edu.ec" required>
+            </div>
           </div>
           <div class="mb-3">
             <label class="form-label">Contraseña</label>
-            <input type="password" class="form-control" [(ngModel)]="password" name="password"
-                   placeholder="Ingresa tu contraseña" required>
+            <div class="input-group">
+              <span class="input-group-text"><i class="bi bi-lock"></i></span>
+              <input type="password" class="form-control" [(ngModel)]="password" name="password"
+                     placeholder="Ingresa tu contraseña" required>
+            </div>
           </div>
           <button type="submit" class="btn btn-sacarf w-100 mb-3" [disabled]="loading">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>

@@ -13,6 +13,7 @@ interface NavItem {
 @Component({
   selector: 'app-layout',
   template: `
+    <div class="sidebar-overlay" *ngIf="sidebarOpen" (click)="sidebarOpen = false"></div>
     <div class="sidebar" [class.open]="sidebarOpen">
       <div class="sidebar-header">
         <a class="brand" routerLink="/dashboard">
@@ -34,7 +35,7 @@ interface NavItem {
 
     <div class="main-content">
       <div class="topbar">
-        <button class="btn btn-link text-dark" (click)="sidebarOpen = !sidebarOpen">
+        <button class="btn btn-link text-dark sidebar-toggle" (click)="sidebarOpen = !sidebarOpen">
           <i class="bi bi-list fs-4"></i>
         </button>
         <div class="d-flex align-items-center gap-3">

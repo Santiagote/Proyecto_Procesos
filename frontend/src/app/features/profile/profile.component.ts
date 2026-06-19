@@ -11,12 +11,12 @@ import { User } from '@core/models/user.model';
       <div class="col-md-4">
         <div class="card text-center">
           <div class="card-body">
-            <div class="mb-3">
-              <i class="bi bi-person-circle" style="font-size:5rem;color:#1a237e;"></i>
+            <div class="avatar-circle mb-3">
+              <i class="bi bi-person-fill"></i>
             </div>
             <h5>{{ currentUser?.nombres }} {{ currentUser?.apellidos }}</h5>
-            <span class="badge bg-primary">{{ roleLabel }}</span>
-            <p class="text-muted small mt-2">{{ currentUser?.email }}</p>
+            <span class="badge badge-primary mb-2">{{ roleLabel }}</span>
+            <p class="text-muted small">{{ currentUser?.email }}</p>
           </div>
         </div>
       </div>
@@ -39,8 +39,9 @@ import { User } from '@core/models/user.model';
                   <input type="text" class="form-control" [(ngModel)]="form.apellidos" name="apellidos">
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label">Teléfono</label>
-                  <input type="text" class="form-control" [(ngModel)]="form.telefono" name="telefono">
+                  <label class="form-label">Tel&eacute;fono</label>
+                  <input type="text" class="form-control" [(ngModel)]="form.telefono" name="telefono"
+                         maxlength="20" (input)="onlyNumbers($event)" inputmode="numeric">
                 </div>
                 <div class="col-md-6">
                   <label class="form-label">Foto de perfil</label>
@@ -54,16 +55,16 @@ import { User } from '@core/models/user.model';
             </form>
 
             <hr>
-            <h6>Cambiar Contraseña</h6>
+            <h6>Cambiar Contrase&ntilde;a</h6>
             <form (ngSubmit)="onChangePassword()">
               <div class="row g-2">
                 <div class="col-md-4">
                   <input type="password" class="form-control" [(ngModel)]="pwForm.current"
-                         name="currentPw" placeholder="Contraseña actual">
+                         name="currentPw" placeholder="Contrase&ntilde;a actual">
                 </div>
                 <div class="col-md-4">
                   <input type="password" class="form-control" [(ngModel)]="pwForm.newPw"
-                         name="newPw" placeholder="Nueva contraseña">
+                         name="newPw" placeholder="Nueva contrase&ntilde;a">
                 </div>
                 <div class="col-md-4">
                   <input type="password" class="form-control" [(ngModel)]="pwForm.confirm"
@@ -71,7 +72,7 @@ import { User } from '@core/models/user.model';
                 </div>
               </div>
               <button type="submit" class="btn btn-outline-primary mt-2 btn-sm">
-                Cambiar Contraseña
+                Cambiar Contrase&ntilde;a
               </button>
             </form>
           </div>
@@ -102,6 +103,11 @@ export class ProfileComponent implements OnInit {
       this.roleLabel = this.currentUser.role === 'ADMIN' ? 'Administrador'
         : this.currentUser.role === 'TEACHER' ? 'Docente' : 'Estudiante';
     }
+  }
+
+  onlyNumbers(e: Event): void {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '');
   }
 
   onFileChange(e: any): void {

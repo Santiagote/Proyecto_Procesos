@@ -15,7 +15,7 @@ from apps.accounts.permissions import IsAdmin, IsAdminOrTeacher
 class CareerViewSet(ModelViewSet):
     queryset = Career.objects.all()
     serializer_class = CareerSerializer
-    permission_classes = [IsAuthenticated, IsAdmin]
+    permission_classes = [IsAuthenticated, IsAdminOrTeacher]
 
 
 class SubjectViewSet(ModelViewSet):

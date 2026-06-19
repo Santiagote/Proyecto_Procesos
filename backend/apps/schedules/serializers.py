@@ -26,3 +26,18 @@ class AcademicPeriodSerializer(serializers.ModelSerializer):
     class Meta:
         model = AcademicPeriod
         fields = "__all__"
+
+    def validate(self, data):
+        start = data.get("start_date") or getattr(self.instance, "start_date", None)
+        end = data.get("end_date") or getattr(self.instance, "end_date", None)
+        if start and end:
+            if end <= start:
+                raise serializers.ValidationError(
+                    "La fecha fin debe ser posterior a la fecha de inicio"
+                )
+            delta = (end - start).days
+            if delta < 120:
+                raise serializers.ValidationError(
+                    "El período académico debe tener al menos 4 meses (120 días)"
+                )
+        return data

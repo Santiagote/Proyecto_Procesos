@@ -6,9 +6,11 @@ import { AttendanceService } from '@core/services/attendance.service';
 @Component({
   selector: 'app-dashboard',
   template: `
-    <h4 class="page-title">
-      Bienvenido, {{ currentUser?.nombres }} {{ currentUser?.apellidos }}
-    </h4>
+    <div class="page-header">
+      <h4 class="page-title mb-0">
+        Bienvenido, {{ currentUser?.nombres }} {{ currentUser?.apellidos }}
+      </h4>
+    </div>
 
     <div class="row g-3 mb-4">
       <div class="col-md-3" *ngIf="isAdmin">
@@ -51,9 +53,9 @@ import { AttendanceService } from '@core/services/attendance.service';
 
     <div class="row g-3">
       <div class="col-md-6">
-        <div class="card">
+        <div class="card modern-card">
           <div class="card-header">
-            <i class="bi bi-lightning-charge-fill me-2"></i>Acciones Rápidas
+            <i class="bi bi-lightning-charge-fill"></i>Acciones Rápidas
           </div>
           <div class="card-body">
             <div class="d-grid gap-2">
@@ -86,31 +88,36 @@ import { AttendanceService } from '@core/services/attendance.service';
         </div>
       </div>
       <div class="col-md-6">
-        <div class="card">
+        <div class="card modern-card">
           <div class="card-header">
-            <i class="bi bi-clock-history me-2"></i>Últimos Registros
+            <i class="bi bi-clock-history"></i>Últimos Registros
           </div>
           <div class="card-body p-0">
-            <table class="data-table mb-0" *ngIf="recentRecords.length > 0; else noRecords">
-              <thead>
-                <tr>
-                  <th>Estudiante</th>
-                  <th>Asignatura</th>
-                  <th>Hora</th>
-                  <th>Estado</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr *ngFor="let r of recentRecords.slice(0, 8)">
-                  <td>{{ r.student_name }}</td>
-                  <td>{{ r.subject_name }}</td>
-                  <td>{{ r.recorded_at | date:'HH:mm' }}</td>
-                  <td><span class="status-badge status-presente">Presente</span></td>
-                </tr>
-              </tbody>
-            </table>
+            <div class="table-container">
+              <table class="data-table mb-0" *ngIf="recentRecords.length > 0; else noRecords">
+                <thead>
+                  <tr>
+                    <th>Estudiante</th>
+                    <th>Asignatura</th>
+                    <th>Hora</th>
+                    <th>Estado</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let r of recentRecords.slice(0, 8)">
+                    <td>{{ r.student_name }}</td>
+                    <td>{{ r.subject_name }}</td>
+                    <td>{{ r.recorded_at | date:'HH:mm' }}</td>
+                    <td><span class="status-badge status-presente">Presente</span></td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
             <ng-template #noRecords>
-              <div class="p-4 text-center text-muted">No hay registros recientes</div>
+              <div class="empty-state">
+                <i class="bi bi-clock-history"></i>
+                <p>No hay registros recientes</p>
+              </div>
             </ng-template>
           </div>
         </div>

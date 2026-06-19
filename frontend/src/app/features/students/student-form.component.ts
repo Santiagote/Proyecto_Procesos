@@ -7,9 +7,11 @@ import { finalize } from 'rxjs';
 @Component({
   selector: 'app-student-form',
   template: `
-    <h4 class="page-title">{{ isEdit ? 'Editar' : 'Nuevo' }} Estudiante</h4>
+    <div class="page-header">
+      <h4 class="page-title mb-0">{{ isEdit ? 'Editar' : 'Nuevo' }} Estudiante</h4>
+    </div>
 
-    <div class="card">
+    <div class="card modern-card">
       <div class="card-body">
         <div *ngIf="error" class="alert alert-danger">{{ error }}</div>
 
@@ -17,7 +19,11 @@ import { finalize } from 'rxjs';
           <div class="row g-3">
             <div class="col-md-4">
               <label class="form-label">Cédula *</label>
-              <input type="text" class="form-control" [(ngModel)]="form.cedula" name="cedula" required>
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
+                <input type="text" class="form-control" [(ngModel)]="form.cedula" name="cedula" required
+                       maxlength="13" (input)="onlyNumbers($event)" inputmode="numeric">
+              </div>
             </div>
             <div class="col-md-4">
               <label class="form-label">Nombres *</label>
@@ -29,21 +35,28 @@ import { finalize } from 'rxjs';
             </div>
             <div class="col-md-4">
               <label class="form-label">Email *</label>
-              <input type="email" class="form-control" [(ngModel)]="form.email" name="email" required
-                     [readonly]="isEdit">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-envelope"></i></span>
+                <input type="email" class="form-control" [(ngModel)]="form.email" name="email" required
+                       [readonly]="isEdit">
+              </div>
             </div>
             <div class="col-md-4">
               <label class="form-label">Teléfono</label>
-              <input type="text" class="form-control" [(ngModel)]="form.telefono" name="telefono">
+              <div class="input-group">
+                <span class="input-group-text"><i class="bi bi-telephone"></i></span>
+                <input type="text" class="form-control" [(ngModel)]="form.telefono" name="telefono"
+                       maxlength="20" (input)="onlyNumbers($event)" inputmode="numeric">
+              </div>
             </div>
             <div class="col-md-4">
               <label class="form-label">Carrera *</label>
               <select class="form-select" [(ngModel)]="form.career_id" name="career_id" required [disabled]="careersLoading">
                 <option [ngValue]="null">Seleccionar...</option>
-                <option *ngFor="let c of careers" [ngValue]="c.id">{{ c.name || c.nombre || c.code || c.codigo || ('Carrera ' + c.id) }}</option>
+                <option *ngFor="let c of careers" [ngValue]="c.id">{{ c.name }}</option>
               </select>
-              <small *ngIf="!careersLoading && careers.length === 0" class="text-muted">
-                No hay carreras disponibles para seleccionar.
+              <small *ngIf="!careersLoading && careers.length === 0" class="text-warning">
+                No hay carreras disponibles. Contacta al administrador.
               </small>
             </div>
             <div class="col-md-4">
@@ -57,7 +70,7 @@ import { finalize } from 'rxjs';
           </div>
 
           <div class="mt-4">
-            <button type="submit" class="btn btn-sacarf me-2" [disabled]="loading || studentForm.invalid">
+            <button type="submit" class="btn btn-primary-glow me-2" [disabled]="loading || studentForm.invalid">
               <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
               {{ isEdit ? 'Actualizar' : 'Registrar' }} Estudiante
             </button>
@@ -98,12 +111,8 @@ export class StudentFormComponent implements OnInit {
       .pipe(finalize(() => this.careersLoading = false))
       .subscribe({
         next: (c) => this.careers = c,
-        error: (err) => {
-          if (err && err.status === 401) {
-            this.error = 'Necesitas iniciar sesión para ver las carreras. Por favor, inicia sesión.';
-          } else {
-            this.error = 'Error cargando carreras.';
-          }
+        error: () => {
+          this.error = 'Error cargando carreras.';
           this.careers = [];
         }
       });
@@ -118,6 +127,11 @@ export class StudentFormComponent implements OnInit {
         this.form.nivel = s.nivel;
       });
     }
+  }
+
+  onlyNumbers(e: Event): void {
+    const input = e.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '');
   }
 
   onFileSelected(event: any): void {

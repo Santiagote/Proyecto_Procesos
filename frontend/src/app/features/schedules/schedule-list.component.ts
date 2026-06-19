@@ -1,66 +1,211 @@
 import { Component, OnInit } from '@angular/core';
 import { ScheduleService } from '@core/services/schedule.service';
 import { Schedule, WEEK_DAYS, AcademicPeriod } from '@core/models/schedule.model';
+import { UserService } from '@core/services/user.service';
+import { StudentService } from '@core/services/student.service';
+import { Subject } from '@core/models/student.model';
+import { User } from '@core/models/user.model';
 
 @Component({
   selector: 'app-schedule-list',
   template: `
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="page-header">
       <h4 class="page-title mb-0">Gestión de Horarios</h4>
-      <div>
-        <button class="btn btn-outline-success me-2" data-bs-toggle="modal" data-bs-target="#periodModal">
-          <i class="bi bi-plus-circle me-1"></i>Período
+      <div class="d-flex gap-2">
+        <button class="btn btn-glass btn-glass-success" (click)="openPeriodModal()">
+          <i class="bi bi-calendar-plus me-1"></i>Período
         </button>
-        <button class="btn btn-sacarf" data-bs-toggle="modal" data-bs-target="#scheduleModal"
-                (click)="openNewSchedule()">
+        <button class="btn btn-primary-glow" (click)="openScheduleModal()">
           <i class="bi bi-plus-lg me-1"></i>Nuevo Horario
         </button>
       </div>
     </div>
 
-    <div class="row g-3 mb-3">
-      <div class="col-md-3" *ngFor="let p of periods">
-        <div class="card text-center p-3" [class.border-primary]="p.is_active">
-          <strong>{{ p.name }}</strong>
-          <small class="text-muted">{{ p.start_date }} - {{ p.end_date }}</small>
-          <span class="badge bg-success mt-1" *ngIf="p.is_active">Activo</span>
+    <!-- Períodos Académicos -->
+    <div class="periods-grid" *ngIf="periods.length > 0">
+      <div class="period-card" *ngFor="let p of periods" [class.active]="p.is_active">
+        <div class="period-card-body">
+          <div class="period-card-top">
+            <span class="period-name">{{ p.name }}</span>
+            <span class="period-badge" [class.active]="p.is_active">
+              {{ p.is_active ? 'Activo' : 'Inactivo' }}
+            </span>
+          </div>
+          <div class="period-dates">
+            <i class="bi bi-calendar3"></i>
+            {{ p.start_date }} — {{ p.end_date }}
+          </div>
+          <div class="period-duration">
+            <i class="bi bi-clock"></i>
+            {{ getPeriodDuration(p) }}
+          </div>
+        </div>
+        <div class="period-card-actions">
+          <button class="btn-icon" title="Editar período" (click)="editPeriod(p)">
+            <i class="bi bi-pencil"></i>
+          </button>
+          <button class="btn-icon text-danger" title="Eliminar período" (click)="deletePeriod(p)">
+            <i class="bi bi-trash3"></i>
+          </button>
         </div>
       </div>
     </div>
 
-    <div class="card">
+    <!-- Tabla de Horarios -->
+    <div class="card modern-card">
       <div class="card-body p-0">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>Asignatura</th>
-              <th>Docente</th>
-              <th>Día</th>
-              <th>Horario</th>
-              <th>Aula</th>
-              <th>Período</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let s of schedules">
-              <td>{{ s.subject_name }}</td>
-              <td>{{ s.teacher_name }}</td>
-              <td>{{ WEEK_DAYS[s.week_day] }}</td>
-              <td>{{ s.start_time }} - {{ s.end_time }}</td>
-              <td>{{ s.classroom || '-' }}</td>
-              <td>{{ s.academic_period }}</td>
-              <td>
-                <button class="btn btn-sm btn-outline-primary me-1" (click)="openEditSchedule(s)">
-                  <i class="bi bi-pencil"></i>
-                </button>
-                <button class="btn btn-sm btn-outline-danger" (click)="deleteSchedule(s.id)">
-                  <i class="bi bi-trash"></i>
-                </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Asignatura</th>
+                <th>Docente</th>
+                <th>Día</th>
+                <th>Horario</th>
+                <th>Aula</th>
+                <th>Período</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of schedules">
+                <td>
+                  <span class="fw-medium text-light">{{ s.subject_name }}</span>
+                </td>
+                <td>{{ s.teacher_name }}</td>
+                <td>
+                  <span class="day-badge">{{ WEEK_DAYS[s.week_day] }}</span>
+                </td>
+                <td class="text-nowrap">
+                  <i class="bi bi-clock me-1 text-muted"></i>{{ s.start_time }} - {{ s.end_time }}
+                </td>
+                <td>{{ s.classroom || '—' }}</td>
+                <td>
+                  <span class="period-tag">{{ s.academic_period }}</span>
+                </td>
+                <td>
+                  <div class="table-actions justify-content-end">
+                    <button class="btn btn-sm btn-outline-primary" (click)="openScheduleModal(s)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteSchedule(s.id)">
+                      <i class="bi bi-trash3"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div *ngIf="schedules.length === 0" class="empty-state">
+          <i class="bi bi-calendar-week"></i>
+          <p>No hay horarios registrados</p>
+          <button class="btn btn-primary-glow btn-sm" (click)="openScheduleModal()">
+            <i class="bi bi-plus-lg me-1"></i>Crear primer horario
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Horario -->
+    <div *ngIf="showScheduleModal" class="modal-custom-overlay" (click)="closeScheduleModal()">
+      <div class="modal-custom" (click)="$event.stopPropagation()">
+        <div class="modal-custom-header">
+          <span>{{ editScheduleId ? 'Editar Horario' : 'Nuevo Horario' }}</span>
+          <button class="modal-custom-close" (click)="closeScheduleModal()">&times;</button>
+        </div>
+        <div class="modal-custom-body">
+          <div *ngIf="schedError" class="alert alert-danger py-2 small">{{ schedError }}</div>
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label class="form-label">Asignatura *</label>
+              <select class="form-select" [(ngModel)]="schedForm.subject_id">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let sub of subjects" [ngValue]="sub.id">{{ sub.name }}</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Docente *</label>
+              <select class="form-select" [(ngModel)]="schedForm.teacher_id">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let t of teachers" [ngValue]="t.id">{{ t.nombres }} {{ t.apellidos }}</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Día *</label>
+              <select class="form-select" [(ngModel)]="schedForm.week_day">
+                <option [ngValue]="null">Seleccionar...</option>
+                <option *ngFor="let d of weekDayKeys" [ngValue]="d">{{ WEEK_DAYS[d] }}</option>
+              </select>
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Hora inicio *</label>
+              <input type="time" class="form-control" [(ngModel)]="schedForm.start_time">
+            </div>
+            <div class="col-md-4">
+              <label class="form-label">Hora fin *</label>
+              <input type="time" class="form-control" [(ngModel)]="schedForm.end_time">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Aula</label>
+              <input type="text" class="form-control" [(ngModel)]="schedForm.classroom" placeholder="Ej: A-101">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Período académico *</label>
+              <select class="form-select" [(ngModel)]="schedForm.academic_period">
+                <option value="">Seleccionar...</option>
+                <option *ngFor="let p of periods" [value]="p.name">{{ p.name }}</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-custom-footer">
+          <button class="btn btn-outline-secondary" (click)="closeScheduleModal()">Cancelar</button>
+          <button class="btn btn-primary-glow" (click)="saveSchedule()" [disabled]="schedSaving">
+            <span *ngIf="schedSaving" class="spinner-border spinner-border-sm me-2"></span>
+            {{ editScheduleId ? 'Actualizar' : 'Crear Horario' }}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Período -->
+    <div *ngIf="showPeriodModal" class="modal-custom-overlay" (click)="closePeriodModal()">
+      <div class="modal-custom" (click)="$event.stopPropagation()">
+        <div class="modal-custom-header">
+          <span>{{ editPeriodId ? 'Editar Período' : 'Nuevo Período Académico' }}</span>
+          <button class="modal-custom-close" (click)="closePeriodModal()">&times;</button>
+        </div>
+        <div class="modal-custom-body">
+          <div *ngIf="periodError" class="alert alert-danger py-2 small">{{ periodError }}</div>
+          <div class="row g-3">
+            <div class="col-md-12">
+              <label class="form-label">Nombre *</label>
+              <input type="text" class="form-control" [(ngModel)]="periodForm.name" placeholder="Ej: 2026-1S">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Fecha inicio *</label>
+              <input type="date" class="form-control" [(ngModel)]="periodForm.start_date">
+            </div>
+            <div class="col-md-6">
+              <label class="form-label">Fecha fin *</label>
+              <input type="date" class="form-control" [(ngModel)]="periodForm.end_date">
+            </div>
+            <div class="col-12">
+              <div class="form-check">
+                <input class="form-check-input" type="checkbox" [(ngModel)]="periodForm.is_active" id="periodActive">
+                <label class="form-check-label" for="periodActive">Período activo</label>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-custom-footer">
+          <button class="btn btn-outline-secondary" (click)="closePeriodModal()">Cancelar</button>
+          <button class="btn btn-primary-glow" (click)="savePeriod()" [disabled]="periodSaving">
+            <span *ngIf="periodSaving" class="spinner-border spinner-border-sm me-2"></span>
+            {{ editPeriodId ? 'Actualizar' : 'Crear Período' }}
+          </button>
+        </div>
       </div>
     </div>
   `,
@@ -69,8 +214,28 @@ export class ScheduleListComponent implements OnInit {
   schedules: Schedule[] = [];
   periods: AcademicPeriod[] = [];
   WEEK_DAYS = WEEK_DAYS;
+  weekDayKeys = Object.keys(WEEK_DAYS).map(Number);
 
-  constructor(private scheduleService: ScheduleService) {}
+  subjects: Subject[] = [];
+  teachers: User[] = [];
+
+  showScheduleModal = false;
+  editScheduleId: number | null = null;
+  schedSaving = false;
+  schedError = '';
+  schedForm = { subject_id: null as number | null, teacher_id: null as number | null, week_day: null as number | null, start_time: '', end_time: '', classroom: '', academic_period: '' };
+
+  showPeriodModal = false;
+  editPeriodId: number | null = null;
+  periodSaving = false;
+  periodError = '';
+  periodForm = { name: '', start_date: '', end_date: '', is_active: false };
+
+  constructor(
+    private scheduleService: ScheduleService,
+    private userService: UserService,
+    private studentService: StudentService,
+  ) {}
 
   ngOnInit(): void {
     this.loadData();
@@ -79,15 +244,118 @@ export class ScheduleListComponent implements OnInit {
   loadData(): void {
     this.scheduleService.getSchedules().subscribe(s => this.schedules = s);
     this.scheduleService.getPeriods().subscribe(p => this.periods = p);
+    this.studentService.getSubjects().subscribe(s => this.subjects = s);
+    this.userService.getUsers().subscribe(u => this.teachers = u.filter(x => x.role === 'TEACHER'));
   }
 
-  openNewSchedule(): void {}
+  getPeriodDuration(p: AcademicPeriod): string {
+    if (!p.start_date || !p.end_date) return '';
+    const start = new Date(p.start_date);
+    const end = new Date(p.end_date);
+    const diffMs = end.getTime() - start.getTime();
+    const months = Math.floor(diffMs / (1000 * 60 * 60 * 24 * 30));
+    const days = Math.floor((diffMs % (1000 * 60 * 60 * 24 * 30)) / (1000 * 60 * 60 * 24));
+    if (months > 0) return `${months}m ${days}d`;
+    return `${days} días`;
+  }
 
-  openEditSchedule(s: Schedule): void {}
+  openScheduleModal(s?: Schedule): void {
+    this.schedError = '';
+    if (s) {
+      this.editScheduleId = s.id;
+      this.schedForm = {
+        subject_id: s.subject,
+        teacher_id: s.teacher,
+        week_day: s.week_day,
+        start_time: s.start_time,
+        end_time: s.end_time,
+        classroom: s.classroom || '',
+        academic_period: s.academic_period,
+      };
+    } else {
+      this.editScheduleId = null;
+      this.schedForm = { subject_id: null, teacher_id: null, week_day: null, start_time: '', end_time: '', classroom: '', academic_period: '' };
+    }
+    this.showScheduleModal = true;
+  }
+
+  closeScheduleModal(): void {
+    this.showScheduleModal = false;
+  }
+
+  saveSchedule(): void {
+    if (!this.schedForm.subject_id || !this.schedForm.teacher_id || !this.schedForm.week_day || !this.schedForm.start_time || !this.schedForm.end_time || !this.schedForm.academic_period) {
+      this.schedError = 'Completa todos los campos obligatorios';
+      return;
+    }
+    this.schedSaving = true;
+    this.schedError = '';
+
+    const data = {
+      subject: this.schedForm.subject_id,
+      teacher: this.schedForm.teacher_id,
+      week_day: this.schedForm.week_day,
+      start_time: this.schedForm.start_time,
+      end_time: this.schedForm.end_time,
+      classroom: this.schedForm.classroom,
+      academic_period: this.schedForm.academic_period,
+    };
+
+    const obs = this.editScheduleId
+      ? this.scheduleService.updateSchedule(this.editScheduleId, data)
+      : this.scheduleService.createSchedule(data);
+
+    obs.subscribe({
+      next: () => { this.schedSaving = false; this.closeScheduleModal(); this.loadData(); },
+      error: err => { this.schedError = err.message; this.schedSaving = false; },
+    });
+  }
 
   deleteSchedule(id: number): void {
     if (confirm('¿Eliminar este horario?')) {
       this.scheduleService.deleteSchedule(id).subscribe(() => this.loadData());
+    }
+  }
+
+  openPeriodModal(): void {
+    this.editPeriodId = null;
+    this.periodForm = { name: '', start_date: '', end_date: '', is_active: false };
+    this.periodError = '';
+    this.showPeriodModal = true;
+  }
+
+  editPeriod(p: AcademicPeriod): void {
+    this.editPeriodId = p.id;
+    this.periodForm = { name: p.name, start_date: p.start_date, end_date: p.end_date, is_active: p.is_active };
+    this.periodError = '';
+    this.showPeriodModal = true;
+  }
+
+  closePeriodModal(): void {
+    this.showPeriodModal = false;
+  }
+
+  savePeriod(): void {
+    if (!this.periodForm.name || !this.periodForm.start_date || !this.periodForm.end_date) {
+      this.periodError = 'Completa todos los campos obligatorios';
+      return;
+    }
+    this.periodSaving = true;
+    this.periodError = '';
+
+    const obs = this.editPeriodId
+      ? this.scheduleService.updatePeriod(this.editPeriodId, this.periodForm)
+      : this.scheduleService.createPeriod(this.periodForm);
+
+    obs.subscribe({
+      next: () => { this.periodSaving = false; this.closePeriodModal(); this.loadData(); },
+      error: err => { this.periodError = err.message; this.periodSaving = false; },
+    });
+  }
+
+  deletePeriod(p: AcademicPeriod): void {
+    if (confirm(`¿Eliminar el período "${p.name}"?`)) {
+      this.scheduleService.deletePeriod(p.id).subscribe(() => this.loadData());
     }
   }
 }
