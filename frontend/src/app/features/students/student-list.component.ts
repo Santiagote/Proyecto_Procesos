@@ -6,14 +6,18 @@ import { AuthService } from '@core/services/auth.service';
 @Component({
   selector: 'app-student-list',
   template: `
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="page-header">
       <h4 class="page-title mb-0">Gestión de Estudiantes</h4>
+<<<<<<< HEAD
+      <button class="btn btn-primary-glow" routerLink="/students/new">
+=======
       <button class="btn btn-sacarf" routerLink="/students/new" *ngIf="isAdmin">
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
         <i class="bi bi-person-plus-fill me-2"></i>Nuevo Estudiante
       </button>
     </div>
 
-    <div class="card">
+    <div class="card modern-card">
       <div class="card-body">
         <div class="row mb-3">
           <div class="col-md-6">
@@ -29,6 +33,41 @@ import { AuthService } from '@core/services/auth.service';
           <div class="spinner-border text-primary" role="status"></div>
         </div>
 
+<<<<<<< HEAD
+        <div class="table-container" *ngIf="!loading && students.length > 0">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Cédula</th>
+                <th>Nombres</th>
+                <th>Email</th>
+                <th>Carrera</th>
+                <th>Nivel</th>
+                <th class="text-end">Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let s of students">
+                <td>{{ s.user.cedula }}</td>
+                <td><span class="fw-medium text-light">{{ s.user.nombres }} {{ s.user.apellidos }}</span></td>
+                <td>{{ s.user.email }}</td>
+                <td>{{ s.career_name }}</td>
+                <td>{{ s.nivel }}</td>
+                <td>
+                  <div class="table-actions justify-content-end">
+                    <button class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/students', s.id]">
+                      <i class="bi bi-eye"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-danger" (click)="confirmDeactivate(s)">
+                      <i class="bi bi-person-x-fill"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+=======
         <table class="data-table" *ngIf="!loading && students.length > 0">
           <thead>
             <tr>
@@ -58,31 +97,31 @@ import { AuthService } from '@core/services/auth.service';
             </tr>
           </tbody>
         </table>
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
 
-        <div *ngIf="!loading && students.length === 0" class="text-center py-4 text-muted">
-          No se encontraron estudiantes
+        <div *ngIf="!loading && students.length === 0" class="empty-state">
+          <i class="bi bi-people"></i>
+          <p>No se encontraron estudiantes</p>
         </div>
       </div>
     </div>
 
-    <div *ngIf="showDeactivateModal" class="modal d-block" style="background:rgba(0,0,0,0.5);">
-      <div class="modal-dialog">
-        <div class="modal-content">
-          <div class="modal-header">
-            <h5 class="modal-title">Desactivar Estudiante</h5>
-            <button class="btn-close" (click)="showDeactivateModal = false"></button>
+    <div *ngIf="showDeactivateModal" class="modal-custom-overlay" (click)="showDeactivateModal = false">
+      <div class="modal-custom" (click)="$event.stopPropagation()">
+        <div class="modal-custom-header">
+          <span>Desactivar Estudiante</span>
+          <button class="modal-custom-close" (click)="showDeactivateModal = false">&times;</button>
+        </div>
+        <div class="modal-custom-body">
+          <p>¿Desactivar a <strong>{{ selectedStudent?.user?.nombres }} {{ selectedStudent?.user?.apellidos }}</strong>?</p>
+          <div class="mb-3">
+            <label class="form-label">Motivo</label>
+            <textarea class="form-control" [(ngModel)]="deactivateReason" rows="2" placeholder="Razón de la desactivación"></textarea>
           </div>
-          <div class="modal-body">
-            <p>¿Desactivar a <strong>{{ selectedStudent?.user?.nombres }} {{ selectedStudent?.user?.apellidos }}</strong>?</p>
-            <div class="mb-3">
-              <label class="form-label">Motivo</label>
-              <textarea class="form-control" [(ngModel)]="deactivateReason" rows="2"></textarea>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn btn-secondary" (click)="showDeactivateModal = false">Cancelar</button>
-            <button class="btn btn-danger" (click)="deactivate()">Desactivar</button>
-          </div>
+        </div>
+        <div class="modal-custom-footer">
+          <button class="btn btn-outline-secondary" (click)="showDeactivateModal = false">Cancelar</button>
+          <button class="btn btn-primary-glow" (click)="deactivate()">Desactivar</button>
         </div>
       </div>
     </div>

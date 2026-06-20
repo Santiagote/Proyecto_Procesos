@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, map } from 'rxjs';
 import { environment } from '@env/environment';
 import { Schedule, AcademicPeriod } from '@core/models/schedule.model';
 
@@ -11,7 +11,9 @@ export class ScheduleService {
   constructor(private http: HttpClient) {}
 
   getSchedules(): Observable<Schedule[]> {
-    return this.http.get<Schedule[]>(`${this.baseUrl}/schedules/`);
+    return this.http.get<any>(`${this.baseUrl}/schedules/`).pipe(
+      map(res => res.results ?? res)
+    );
   }
 
   getSchedule(id: number): Observable<Schedule> {
@@ -31,10 +33,20 @@ export class ScheduleService {
   }
 
   getPeriods(): Observable<AcademicPeriod[]> {
-    return this.http.get<AcademicPeriod[]>(`${this.baseUrl}/periods/`);
+    return this.http.get<any>(`${this.baseUrl}/periods/`).pipe(
+      map(res => res.results ?? res)
+    );
   }
 
   createPeriod(data: any): Observable<AcademicPeriod> {
     return this.http.post<AcademicPeriod>(`${this.baseUrl}/periods/`, data);
+  }
+
+  updatePeriod(id: number, data: any): Observable<AcademicPeriod> {
+    return this.http.patch<AcademicPeriod>(`${this.baseUrl}/periods/${id}/`, data);
+  }
+
+  deletePeriod(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.baseUrl}/periods/${id}/`);
   }
 }

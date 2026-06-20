@@ -23,11 +23,35 @@ export class ErrorInterceptor implements HttpInterceptor {
           message = error.error.detail;
         } else if (error.error instanceof Object) {
           const firstKey = Object.keys(error.error)[0];
-          if (firstKey) message = `${firstKey}: ${error.error[firstKey]}`;
+          const val = error.error[firstKey];
+          if (Array.isArray(val)) {
+            message = `${firstKey}: ${val.join(', ')}`;
+          } else if (typeof val === 'string') {
+            message = `${firstKey}: ${val}`;
+          } else if (typeof val === 'object' && val !== null) {
+            message = JSON.stringify(val);
+          } else {
+            message = `Error de validación`;
+          }
         } else if (error.error) {
-          message = error.error;
+          message = typeof error.error === 'string' ? error.error : `Error ${error.status}`;
         }
 
+<<<<<<< HEAD
+        if (error.status === 403) {
+          message = 'No tienes permisos para realizar esta acción';
+        } else if (error.status === 404) {
+          message = 'Recurso no encontrado';
+        } else if (error.status === 500) {
+          message = 'Error interno del servidor';
+        } else if (error.status === 0) {
+          message = 'No se puede conectar con el servidor. Verifica tu conexión.';
+        } else if (error.status === 423) {
+          message = error.error?.detail || 'Cuenta bloqueada temporalmente';
+        }
+
+=======
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
         console.error(`[ErrorInterceptor] ${error.status} - ${message}`, error);
 
         const err = new Error(message);
