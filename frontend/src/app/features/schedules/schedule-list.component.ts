@@ -21,6 +21,7 @@ import { User } from '@core/models/user.model';
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Períodos Académicos -->
     <div class="periods-grid" *ngIf="periods.length > 0">
       <div class="period-card" *ngFor="let p of periods" [class.active]="p.is_active">
@@ -47,10 +48,38 @@ import { User } from '@core/models/user.model';
           <button class="btn-icon text-danger" title="Eliminar período" (click)="deletePeriod(p)">
             <i class="bi bi-trash3"></i>
           </button>
+=======
+    <!-- Notificación éxito -->
+    <div *ngIf="successMsg" class="alert alert-success alert-dismissible fade show" role="alert">
+      <i class="bi bi-check-circle-fill me-2"></i>{{ successMsg }}
+      <button type="button" class="btn-close" (click)="successMsg=''"></button>
+    </div>
+
+    <!-- Notificación error -->
+    <div *ngIf="errorMsg" class="alert alert-danger alert-dismissible fade show" role="alert">
+      <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMsg }}
+      <button type="button" class="btn-close" (click)="errorMsg=''"></button>
+    </div>
+
+    <!-- Períodos activos -->
+    <div class="row g-3 mb-3">
+      <div *ngIf="periods.length === 0" class="col-12">
+        <div class="alert alert-warning">
+          <i class="bi bi-exclamation-triangle me-2"></i>No hay períodos académicos registrados. Crea uno primero.
+        </div>
+      </div>
+      <div class="col-md-3" *ngFor="let p of periods">
+        <div class="card text-center p-3" [class.border-primary]="p.is_active">
+          <strong>{{ p.name }}</strong>
+          <small class="text-muted">{{ p.start_date }} - {{ p.end_date }}</small>
+          <span class="badge bg-success mt-1" *ngIf="p.is_active">Activo</span>
+          <span class="badge bg-secondary mt-1" *ngIf="!p.is_active">Inactivo</span>
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
         </div>
       </div>
     </div>
 
+<<<<<<< HEAD
     <!-- Tabla de Horarios -->
     <div class="card modern-card">
       <div class="card-body p-0">
@@ -206,6 +235,80 @@ import { User } from '@core/models/user.model';
             {{ editPeriodId ? 'Actualizar' : 'Crear Período' }}
           </button>
         </div>
+=======
+    <!-- Tabla de horarios -->
+    <div class="card">
+      <div class="card-body p-0">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Asignatura</th>
+              <th>Docente</th>
+              <th>Día</th>
+              <th>Horario</th>
+              <th>Aula</th>
+              <th>Período</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngIf="schedules.length === 0">
+              <td colspan="7" class="text-center text-muted py-4">
+                <i class="bi bi-calendar-x me-2"></i>No hay horarios registrados aún.
+              </td>
+            </tr>
+            <tr *ngFor="let s of schedules">
+              <td>{{ s.subject_name }}</td>
+              <td>{{ s.teacher_name }}</td>
+              <td>{{ WEEK_DAYS[s.week_day] }}</td>
+              <td>{{ s.start_time }} - {{ s.end_time }}</td>
+              <td>{{ s.classroom || '-' }}</td>
+              <td>{{ s.academic_period }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1"
+                        title="Editar horario"
+                        (click)="openEditSchedule(s)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger"
+                        title="Eliminar horario"
+                        [disabled]="deletingId === s.id"
+                        (click)="confirmarEliminar(s)">
+                  <span *ngIf="deletingId === s.id" class="spinner-border spinner-border-sm"></span>
+                  <i *ngIf="deletingId !== s.id" class="bi bi-trash"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
+      </div>
+    </div>
+
+    <!-- Modal confirmar eliminar -->
+    <div class="modal fade" id="deleteScheduleModal" tabindex="-1">
+      <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+          <div class="modal-header bg-danger text-white">
+            <h5 class="modal-title">
+              <i class="bi bi-trash me-2"></i>Eliminar Horario
+            </h5>
+            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+          </div>
+          <div class="modal-body">
+            <p>¿Estás seguro de que deseas eliminar el horario de <strong>{{ scheduleToDelete?.subject_name }}</strong>?</p>
+            <p class="text-muted small">
+              <i class="bi bi-info-circle me-1"></i>
+              Esta acción no se puede deshacer y eliminará también los registros de asistencia asociados.
+            </p>
+          </div>
+          <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="button" class="btn btn-danger" (click)="eliminarConfirmado()">
+              <i class="bi bi-trash me-1"></i>Eliminar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   `,
@@ -214,7 +317,14 @@ export class ScheduleListComponent implements OnInit {
   schedules: Schedule[] = [];
   periods: AcademicPeriod[] = [];
   WEEK_DAYS = WEEK_DAYS;
+<<<<<<< HEAD
   weekDayKeys = Object.keys(WEEK_DAYS).map(Number);
+=======
+  successMsg = '';
+  errorMsg = '';
+  deletingId: number | null = null;
+  scheduleToDelete: Schedule | null = null;
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
 
   subjects: Subject[] = [];
   teachers: User[] = [];
@@ -242,10 +352,21 @@ export class ScheduleListComponent implements OnInit {
   }
 
   loadData(): void {
+<<<<<<< HEAD
     this.scheduleService.getSchedules().subscribe(s => this.schedules = s);
     this.scheduleService.getPeriods().subscribe(p => this.periods = p);
     this.studentService.getSubjects().subscribe(s => this.subjects = s);
     this.userService.getUsers().subscribe(u => this.teachers = u.filter(x => x.role === 'TEACHER'));
+=======
+    this.scheduleService.getSchedules().subscribe({
+      next: (s) => this.schedules = s,
+      error: () => this.errorMsg = 'Error al cargar los horarios. Intenta recargar la página.'
+    });
+    this.scheduleService.getPeriods().subscribe({
+      next: (p) => this.periods = p,
+      error: () => this.errorMsg = 'Error al cargar los períodos académicos.'
+    });
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
   }
 
   getPeriodDuration(p: AcademicPeriod): string {
@@ -311,10 +432,33 @@ export class ScheduleListComponent implements OnInit {
     });
   }
 
-  deleteSchedule(id: number): void {
-    if (confirm('¿Eliminar este horario?')) {
-      this.scheduleService.deleteSchedule(id).subscribe(() => this.loadData());
-    }
+  confirmarEliminar(s: Schedule): void {
+    this.scheduleToDelete = s;
+    const modal = (window as any).bootstrap?.Modal?.getOrCreateInstance(document.getElementById('deleteScheduleModal'));
+    modal?.show();
+  }
+
+  eliminarConfirmado(): void {
+    if (!this.scheduleToDelete) return;
+    const modal = (window as any).bootstrap?.Modal?.getOrCreateInstance(document.getElementById('deleteScheduleModal'));
+    modal?.hide();
+
+    this.deletingId = this.scheduleToDelete.id;
+    this.errorMsg = '';
+    this.successMsg = '';
+
+    this.scheduleService.deleteSchedule(this.scheduleToDelete.id).subscribe({
+      next: () => {
+        this.successMsg = `Horario de "${this.scheduleToDelete?.subject_name}" eliminado correctamente.`;
+        this.deletingId = null;
+        this.scheduleToDelete = null;
+        this.loadData();
+      },
+      error: () => {
+        this.errorMsg = 'Error al eliminar el horario. Intenta nuevamente.';
+        this.deletingId = null;
+      }
+    });
   }
 
   openPeriodModal(): void {

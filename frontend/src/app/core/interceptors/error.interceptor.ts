@@ -13,7 +13,13 @@ export class ErrorInterceptor implements HttpInterceptor {
       catchError((error: HttpErrorResponse) => {
         let message = 'Error del servidor';
 
-        if (error.error?.detail) {
+        if (error.status === 500) {
+          message = 'Error interno del servidor';
+        } else if (error.status === 403) {
+          message = 'No tienes permisos para realizar esta acción';
+        } else if (error.status === 404) {
+          message = 'Recurso no encontrado';
+        } else if (error.error?.detail) {
           message = error.error.detail;
         } else if (error.error instanceof Object) {
           const firstKey = Object.keys(error.error)[0];
@@ -31,6 +37,7 @@ export class ErrorInterceptor implements HttpInterceptor {
           message = typeof error.error === 'string' ? error.error : `Error ${error.status}`;
         }
 
+<<<<<<< HEAD
         if (error.status === 403) {
           message = 'No tienes permisos para realizar esta acción';
         } else if (error.status === 404) {
@@ -43,8 +50,13 @@ export class ErrorInterceptor implements HttpInterceptor {
           message = error.error?.detail || 'Cuenta bloqueada temporalmente';
         }
 
+=======
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
         console.error(`[ErrorInterceptor] ${error.status} - ${message}`, error);
-        return throwError(() => ({ status: error.status, message }));
+
+        const err = new Error(message);
+        (err as any).status = error.status;
+        return throwError(() => err);
       })
     );
   }

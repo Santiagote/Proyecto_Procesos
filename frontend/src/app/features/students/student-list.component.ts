@@ -1,13 +1,18 @@
 import { Component, OnInit } from '@angular/core';
 import { StudentService } from '@core/services/student.service';
 import { Student, Career } from '@core/models/student.model';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-student-list',
   template: `
     <div class="page-header">
       <h4 class="page-title mb-0">Gestión de Estudiantes</h4>
+<<<<<<< HEAD
       <button class="btn btn-primary-glow" routerLink="/students/new">
+=======
+      <button class="btn btn-sacarf" routerLink="/students/new" *ngIf="isAdmin">
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
         <i class="bi bi-person-plus-fill me-2"></i>Nuevo Estudiante
       </button>
     </div>
@@ -28,6 +33,7 @@ import { Student, Career } from '@core/models/student.model';
           <div class="spinner-border text-primary" role="status"></div>
         </div>
 
+<<<<<<< HEAD
         <div class="table-container" *ngIf="!loading && students.length > 0">
           <table class="data-table">
             <thead>
@@ -61,6 +67,37 @@ import { Student, Career } from '@core/models/student.model';
             </tbody>
           </table>
         </div>
+=======
+        <table class="data-table" *ngIf="!loading && students.length > 0">
+          <thead>
+            <tr>
+              <th>Cédula</th>
+              <th>Nombres</th>
+              <th>Email</th>
+              <th>Carrera</th>
+              <th>Nivel</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let s of students">
+              <td>{{ s.user.cedula }}</td>
+              <td>{{ s.user.nombres }} {{ s.user.apellidos }}</td>
+              <td>{{ s.user.email }}</td>
+              <td>{{ s.career_name }}</td>
+              <td>{{ s.nivel }}</td>
+              <td>
+                <button class="btn btn-sm btn-outline-primary me-1" [routerLink]="['/students', s.id]" *ngIf="isAdmin">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="btn btn-sm btn-outline-danger" (click)="confirmDeactivate(s)" *ngIf="isAdmin">
+                  <i class="bi bi-person-x-fill"></i>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
 
         <div *ngIf="!loading && students.length === 0" class="empty-state">
           <i class="bi bi-people"></i>
@@ -98,9 +135,11 @@ export class StudentListComponent implements OnInit {
   selectedStudent: Student | null = null;
   deactivateReason = '';
 
-  constructor(private studentService: StudentService) {}
+  isAdmin = false;
+  constructor(private studentService: StudentService, private authService: AuthService) {}
 
   ngOnInit(): void {
+    this.isAdmin = this.authService.hasRole(['ADMIN']);
     this.loadStudents();
   }
 

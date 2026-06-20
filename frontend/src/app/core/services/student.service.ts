@@ -1,9 +1,31 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, of } from 'rxjs';
+import { Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '@env/environment';
+<<<<<<< HEAD
 import { Student, Career, Subject, StudentSubject } from '@core/models/student.model';
+=======
+import { Student, StudentCreateRequest, Career, Subject, StudentSubject } from '@core/models/student.model';
+
+function parsearErrorBackend(err: any): string {
+  const e = err?.error;
+  if (!e) return 'Error al procesar la solicitud. Intenta nuevamente.';
+  if (typeof e === 'string') return e;
+  if (e.detail) return e.detail;
+  if (e.cedula) return `Cédula: ${Array.isArray(e.cedula) ? e.cedula[0] : e.cedula}`;
+  if (e.email) return `Correo: ${Array.isArray(e.email) ? e.email[0] : e.email}`;
+  if (e.user?.cedula) return 'Ya existe un usuario con esa cédula.';
+  if (e.user?.email) return 'Ya existe un usuario con ese correo electrónico.';
+  if (e.non_field_errors) return Array.isArray(e.non_field_errors) ? e.non_field_errors[0] : e.non_field_errors;
+  const primerCampo = Object.keys(e)[0];
+  if (primerCampo) {
+    const msg = Array.isArray(e[primerCampo]) ? e[primerCampo][0] : e[primerCampo];
+    return `${primerCampo}: ${msg}`;
+  }
+  return 'Error al procesar la solicitud. Intenta nuevamente.';
+}
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {
@@ -34,7 +56,7 @@ export class StudentService {
   }
 
   searchStudents(query: string): Observable<Student[]> {
-    return this.http.get<Student[]>(`${this.baseUrl}/search/`, { params: { q: query } });
+    return this.http.get<any>(`${this.baseUrl}/search/`, { params: { q: query } }).pipe(map(res => res.results || res));
   }
 
   getStudentSubjects(studentId: number): Observable<StudentSubject[]> {

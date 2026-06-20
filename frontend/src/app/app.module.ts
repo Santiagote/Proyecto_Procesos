@@ -5,6 +5,7 @@ import { HttpClientModule, HTTP_INTERCEPTORS } from '@angular/common/http';
 import { CommonModule, DatePipe } from '@angular/common';
 
 import { AppRoutingModule } from './app-routing.module';
+import { ActivateAccountComponent } from '@features/auth/activate-account.component';
 import { AppComponent } from './app.component';
 
 // Core
@@ -33,6 +34,7 @@ import { ProfileComponent } from '@features/profile/profile.component';
 
 @NgModule({
   declarations: [
+    ActivateAccountComponent,
     AppComponent,
     LayoutComponent,
     LoginComponent,

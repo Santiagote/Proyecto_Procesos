@@ -1,6 +1,6 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
-from .views import AuthViewSet, UserViewSet
+from .views import ActivateAccountView, AuthViewSet, UserViewSet
 
 router = DefaultRouter()
 router.register(r"users", UserViewSet, basename="users")
@@ -13,4 +13,5 @@ urlpatterns = [
     path("change-password/", AuthViewSet.as_view({"post": "change_password"}), name="auth-change-password"),
     path("profile/", AuthViewSet.as_view({"get": "profile", "patch": "profile"}), name="auth-profile"),
     path("", include(router.urls)),
+    path("activate/<str:token>/", ActivateAccountView.as_view(), name="activate-account"),
 ]

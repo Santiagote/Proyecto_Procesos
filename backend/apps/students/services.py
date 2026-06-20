@@ -21,14 +21,13 @@ class StudentService:
         password = AuthService.generate_temp_password()
         user = User.objects.create_user(**user_data, password=password)
         user.password_change_required = True
+        user.is_active = False
         user.save()
-
         student = Student.objects.create(
             user=user,
             career_id=data["career_id"],
             nivel=data["nivel"],
         )
-
         if image_file:
             from cloud.s3 import upload_student_image
             from cloud.rekognition import index_face
@@ -37,9 +36,8 @@ class StudentService:
             face_id = index_face(url, student.id)
             student.rekognition_face_id = face_id
             student.save()
-
-        from cloud.ses import send_credentials_email
-        send_credentials_email(user.email, password)
+        from apps.accounts.activation import enviar_correo_activacion
+        enviar_correo_activacion(user, password)
         return student
 
     @staticmethod
@@ -52,13 +50,11 @@ class StudentService:
             if field in data:
                 setattr(user, field, data.pop(field))
         user.save()
-
         student_fields = ["career_id", "nivel"]
         for field in student_fields:
             if field in data:
                 setattr(student, field, data[field])
         student.save()
-
         if image_file:
             from cloud.s3 import upload_student_image
             from cloud.rekognition import update_face
@@ -66,7 +62,6 @@ class StudentService:
             student.reference_image_url = url
             update_face(url, student.rekognition_face_id)
             student.save()
-
         return student
 
     @staticmethod
@@ -90,9 +85,20 @@ class StudentService:
     @staticmethod
     def search_students(query):
         from django.db.models import Q
-        return Student.objects.filter(
-            Q(user__cedula__icontains=query) |
-            Q(user__nombres__icontains=query) |
-            Q(user__apellidos__icontains=query) |
-            Q(career__name__icontains=query)
-        ).select_related("user", "career")
+        words = query.strip().split()
+        if len(words) >= 2:
+            filters = (
+                Q(user__nombres__icontains=words[0]) & Q(user__apellidos__icontains=words[1])
+            ) | (
+                Q(user__nombres__icontains=words[1]) & Q(user__apellidos__icontains=words[0])
+            )
+            for word in words:
+                filters |= Q(user__cedula__icontains=word)
+        else:
+            filters = (
+                Q(user__cedula__icontains=query) |
+                Q(user__nombres__icontains=query) |
+                Q(user__apellidos__icontains=query) |
+                Q(career__name__icontains=query)
+            )
+        return Student.objects.filter(filters).select_related("user", "career")

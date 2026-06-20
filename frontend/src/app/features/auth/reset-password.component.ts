@@ -18,12 +18,22 @@ import { AuthService } from '@core/services/auth.service';
         <form (ngSubmit)="onSubmit()" *ngIf="!success">
           <div class="mb-3">
             <label class="form-label">Nueva contraseña</label>
-            <input type="password" class="form-control" [(ngModel)]="newPassword" name="newPassword" required>
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="newPassword" name="newPassword" required>
+              <button type="button" class="btn btn-outline-secondary" (click)="showPassword=!showPassword">
+                <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              </button>
+            </div>
             <small class="text-muted">Mín. 8 caracteres, 1 mayúscula, 1 número, 1 especial</small>
           </div>
           <div class="mb-3">
             <label class="form-label">Confirmar contraseña</label>
-            <input type="password" class="form-control" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+            <div class="input-group">
+              <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="confirmPassword" name="confirmPassword" required>
+              <button type="button" class="btn btn-outline-secondary" (click)="showPassword=!showPassword">
+                <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
+              </button>
+            </div>
           </div>
           <button type="submit" class="btn btn-sacarf w-100" [disabled]="loading">
             <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
@@ -40,6 +50,7 @@ import { AuthService } from '@core/services/auth.service';
 })
 export class ResetPasswordComponent {
   token = '';
+  showPassword = false;
   newPassword = '';
   confirmPassword = '';
   loading = false;

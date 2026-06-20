@@ -2,9 +2,9 @@ services:
   db:
     image: postgres:15
     environment:
-      POSTGRES_DB: sacarfd
+      POSTGRES_DB: sacarf
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: Sacarf2026!
     ports:
       - "5432:5432"
     volumes:
@@ -14,8 +14,11 @@ services:
       interval: 10s
       timeout: 5s
       retries: 5
+<<<<<<< HEAD
     restart: unless-stopped
 
+=======
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
   api:
     build:
       context: ..
@@ -24,6 +27,7 @@ services:
       - "8000:8000"
     env_file:
       - ../.env
+<<<<<<< HEAD
     environment:
       USE_POSTGRES: "True"
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me-in-production}
@@ -34,12 +38,15 @@ services:
       DB_HOST: db
       DB_PORT: "5432"
       CORS_ALLOWED_ORIGINS: http://localhost:3000,http://localhost:4200,http://localhost
+=======
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
     depends_on:
       db:
         condition: service_healthy
     volumes:
       - static_volume:/app/staticfiles
       - media_volume:/app/media
+<<<<<<< HEAD
     restart: unless-stopped
 
   frontend:
@@ -52,6 +59,8 @@ services:
       - api
     restart: unless-stopped
 
+=======
+>>>>>>> 928668af292e6801ff09771a7a94d74221d87885
 volumes:
   postgres_data:
   static_volume:

@@ -5,6 +5,7 @@ import { LayoutComponent } from '@features/layout/layout.component';
 import { LoginComponent } from '@features/auth/login.component';
 import { RecoverPasswordComponent } from '@features/auth/recover-password.component';
 import { ResetPasswordComponent } from '@features/auth/reset-password.component';
+import { ActivateAccountComponent } from '@features/auth/activate-account.component';
 import { DashboardComponent } from '@features/dashboard/dashboard.component';
 import { StudentListComponent } from '@features/students/student-list.component';
 import { StudentFormComponent } from '@features/students/student-form.component';
@@ -22,11 +23,12 @@ const routes: Routes = [
     canActivate: [LoginGuard],
     children: [
       { path: 'login', component: LoginComponent },
-      { path: 'recover-password', component: RecoverPasswordComponent },
-      { path: 'reset-password', component: ResetPasswordComponent },
       { path: '', redirectTo: 'login', pathMatch: 'full' },
     ],
   },
+  { path: 'auth/recover-password', component: RecoverPasswordComponent },
+  { path: 'auth/reset-password', component: ResetPasswordComponent },
+  { path: 'auth/activate', component: ActivateAccountComponent },
   {
     path: '',
     component: LayoutComponent,

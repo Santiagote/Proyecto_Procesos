@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { AuthService } from '@core/services/auth.service';
 import { User } from '@core/models/user.model';
 import { AttendanceService } from '@core/services/attendance.service';
+import { StudentService } from '@core/services/student.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -138,7 +139,7 @@ export class DashboardComponent implements OnInit {
     overallPercentage: 0,
   };
 
-  constructor(private authService: AuthService, private attendanceService: AttendanceService) {}
+  constructor(private authService: AuthService, private attendanceService: AttendanceService, private studentService: StudentService) {}
 
   ngOnInit(): void {
     this.currentUser = this.authService.currentUser;
@@ -156,5 +157,10 @@ export class DashboardComponent implements OnInit {
         if (res.count) this.stats.overallPercentage = 85;
       },
     });
+    if (this.isAdmin) {
+    this.studentService.getStudents({ page_size: 1 }).subscribe({
+      next: res => { this.stats.totalStudents = res.count || 0; },
+    });
   }
+}
 }
