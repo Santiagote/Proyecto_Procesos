@@ -17,33 +17,22 @@ import { AuthService } from '@core/services/auth.service';
 
         <form (ngSubmit)="onLogin()">
           <div class="mb-3">
-<<<<<<< HEAD
-            <label class="form-label">Correo institucional</label>
+            <label class="form-label">Correo electrónico</label>
             <div class="input-group">
               <span class="input-group-text"><i class="bi bi-envelope"></i></span>
               <input type="email" class="form-control" [(ngModel)]="email" name="email"
                      placeholder="correo@unl.edu.ec" required>
             </div>
-=======
-            <label class="form-label">Correo electrónico</label>
-            <input type="email" class="form-control" [(ngModel)]="email" name="email"
-                   placeholder="correo@unl.edu.ec" required>
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
           </div>
           <div class="mb-3">
             <label class="form-label">Contraseña</label>
             <div class="input-group">
-<<<<<<< HEAD
               <span class="input-group-text"><i class="bi bi-lock"></i></span>
-              <input type="password" class="form-control" [(ngModel)]="password" name="password"
-                     placeholder="Ingresa tu contraseña" required>
-=======
               <input [type]="showPassword ? 'text' : 'password'" class="form-control" [(ngModel)]="password" name="password"
                      placeholder="Ingresa tu contraseña" required>
               <button type="button" class="btn btn-outline-secondary" (click)="showPassword=!showPassword">
                 <i [class]="showPassword ? 'bi bi-eye-slash' : 'bi bi-eye'"></i>
               </button>
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
             </div>
           </div>
           <button type="submit" class="btn btn-sacarf w-100 mb-3" [disabled]="loading">

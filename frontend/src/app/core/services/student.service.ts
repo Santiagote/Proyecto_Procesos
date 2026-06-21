@@ -3,10 +3,7 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Observable, of, throwError } from 'rxjs';
 import { map, catchError } from 'rxjs/operators';
 import { environment } from '@env/environment';
-<<<<<<< HEAD
 import { Student, Career, Subject, StudentSubject } from '@core/models/student.model';
-=======
-import { Student, StudentCreateRequest, Career, Subject, StudentSubject } from '@core/models/student.model';
 
 function parsearErrorBackend(err: any): string {
   const e = err?.error;
@@ -25,7 +22,6 @@ function parsearErrorBackend(err: any): string {
   }
   return 'Error al procesar la solicitud. Intenta nuevamente.';
 }
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
 
 @Injectable({ providedIn: 'root' })
 export class StudentService {

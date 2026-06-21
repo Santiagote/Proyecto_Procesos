@@ -11,9 +11,6 @@ import { finalize } from 'rxjs';
       <h4 class="page-title mb-0">{{ isEdit ? 'Editar' : 'Nuevo' }} Estudiante</h4>
     </div>
 
-<<<<<<< HEAD
-    <div class="card modern-card">
-=======
     <!-- Alerta de éxito -->
     <div *ngIf="successMsg" class="alert alert-success alert-dismissible fade show" role="alert">
       <i class="bi bi-check-circle-fill me-2"></i>{{ successMsg }}
@@ -26,35 +23,31 @@ import { finalize } from 'rxjs';
       <button type="button" class="btn-close" (click)="error=''"></button>
     </div>
 
-    <div class="card">
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
+    <div class="card modern-card">
       <div class="card-body">
         <form #studentForm="ngForm" (ngSubmit)="onSubmit(studentForm)" novalidate>
           <div class="row g-3">
 
             <div class="col-md-4">
               <label class="form-label">Cédula *</label>
-<<<<<<< HEAD
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-person-vcard"></i></span>
-                <input type="text" class="form-control" [(ngModel)]="form.cedula" name="cedula" required
-                       maxlength="13" (input)="onlyNumbers($event)" inputmode="numeric">
-=======
-              <input type="text" class="form-control"
-                     [(ngModel)]="form.cedula" name="cedula"
-                     required maxlength="10" pattern="[0-9]{10}"
-                     #cedula="ngModel"
-                     (blur)="validarCedula()"
-                     [class.is-invalid]="cedula.invalid && cedula.touched"
-                     [class.is-valid]="cedula.valid && cedula.touched"
-                     placeholder="Ej: 1104567890">
+                <input type="text" class="form-control"
+                       [(ngModel)]="form.cedula" name="cedula"
+                       required maxlength="10" pattern="[0-9]{10}"
+                       #cedula="ngModel"
+                       (blur)="validarCedula()"
+                       (input)="onlyNumbers($event)" inputmode="numeric"
+                       [class.is-invalid]="cedula.invalid && cedula.touched || !!cedulaError"
+                       [class.is-valid]="cedula.valid && cedula.touched && !cedulaError"
+                       placeholder="Ej: 1104567890">
+              </div>
               <div class="invalid-feedback">
                 <span *ngIf="cedula.errors?.['required']">La cédula es obligatoria.</span>
                 <span *ngIf="cedula.errors?.['pattern']">Debe tener exactamente 10 dígitos numéricos.</span>
               </div>
               <div *ngIf="cedulaError" class="text-danger small mt-1">
                 <i class="bi bi-x-circle me-1"></i>{{ cedulaError }}
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
               </div>
             </div>
 
@@ -94,57 +87,42 @@ import { finalize } from 'rxjs';
 
             <div class="col-md-4">
               <label class="form-label">Email *</label>
-<<<<<<< HEAD
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-envelope"></i></span>
-                <input type="email" class="form-control" [(ngModel)]="form.email" name="email" required
-                       [readonly]="isEdit">
-=======
-              <input type="email" class="form-control"
-                     [(ngModel)]="form.email" name="email"
-                     required email
-                     #emailField="ngModel"
-                     [readonly]="isEdit"
-                     [class.is-invalid]="emailField.invalid && emailField.touched"
-                     [class.is-valid]="emailField.valid && emailField.touched"
-                     placeholder="Ej: juan.perez@unl.edu.ec">
+                <input type="email" class="form-control"
+                       [(ngModel)]="form.email" name="email"
+                       required email
+                       #emailField="ngModel"
+                       [readonly]="isEdit"
+                       [class.is-invalid]="emailField.invalid && emailField.touched"
+                       [class.is-valid]="emailField.valid && emailField.touched"
+                       placeholder="Ej: juan.perez@unl.edu.ec">
+              </div>
               <div class="invalid-feedback">
                 <span *ngIf="emailField.errors?.['required']">El email es obligatorio.</span>
                 <span *ngIf="emailField.errors?.['email']">Ingresa un email válido.</span>
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
               </div>
             </div>
 
             <div class="col-md-4">
               <label class="form-label">Teléfono</label>
-<<<<<<< HEAD
               <div class="input-group">
                 <span class="input-group-text"><i class="bi bi-telephone"></i></span>
-                <input type="text" class="form-control" [(ngModel)]="form.telefono" name="telefono"
-                       maxlength="20" (input)="onlyNumbers($event)" inputmode="numeric">
-=======
-              <input type="text" class="form-control"
-                     [(ngModel)]="form.telefono" name="telefono"
-                     maxlength="10" pattern="[0-9]{7,10}"
-                     #telefono="ngModel"
-                     [class.is-invalid]="telefono.invalid && telefono.touched"
-                     placeholder="Ej: 0991234567">
+                <input type="text" class="form-control"
+                       [(ngModel)]="form.telefono" name="telefono"
+                       maxlength="10" pattern="[0-9]{7,10}"
+                       #telefono="ngModel"
+                       (input)="onlyNumbers($event)" inputmode="numeric"
+                       [class.is-invalid]="telefono.invalid && telefono.touched"
+                       placeholder="Ej: 0991234567">
+              </div>
               <div class="invalid-feedback">
                 <span *ngIf="telefono.errors?.['pattern']">Ingresa un número válido (7-10 dígitos).</span>
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
               </div>
             </div>
 
             <div class="col-md-4">
               <label class="form-label">Carrera *</label>
-<<<<<<< HEAD
-              <select class="form-select" [(ngModel)]="form.career_id" name="career_id" required [disabled]="careersLoading">
-                <option [ngValue]="null">Seleccionar...</option>
-                <option *ngFor="let c of careers" [ngValue]="c.id">{{ c.name }}</option>
-              </select>
-              <small *ngIf="!careersLoading && careers.length === 0" class="text-warning">
-                No hay carreras disponibles. Contacta al administrador.
-=======
               <select class="form-select"
                       [(ngModel)]="form.career_id" name="career_id"
                       required
@@ -159,7 +137,6 @@ import { finalize } from 'rxjs';
               <div class="invalid-feedback">Selecciona una carrera.</div>
               <small *ngIf="!careersLoading && careers.length === 0" class="text-warning">
                 <i class="bi bi-exclamation-triangle me-1"></i>No hay carreras disponibles.
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
               </small>
             </div>
 
@@ -191,14 +168,9 @@ import { finalize } from 'rxjs';
 
           </div>
 
-<<<<<<< HEAD
-          <div class="mt-4">
-            <button type="submit" class="btn btn-primary-glow me-2" [disabled]="loading || studentForm.invalid">
-=======
           <div class="mt-4 d-flex align-items-center gap-2">
-            <button type="submit" class="btn btn-sacarf"
+            <button type="submit" class="btn btn-primary-glow"
                     [disabled]="loading || studentForm.invalid || !!cedulaError">
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
               <span *ngIf="loading" class="spinner-border spinner-border-sm me-2"></span>
               <i *ngIf="!loading" class="bi bi-save me-2"></i>
               {{ isEdit ? 'Actualizar' : 'Registrar' }} Estudiante
@@ -246,15 +218,10 @@ export class StudentFormComponent implements OnInit {
       .pipe(finalize(() => this.careersLoading = false))
       .subscribe({
         next: (c) => this.careers = c,
-<<<<<<< HEAD
-        error: () => {
-          this.error = 'Error cargando carreras.';
-=======
         error: (err) => {
           this.error = err?.status === 401
             ? 'Sesión expirada. Por favor, inicia sesión nuevamente.'
             : 'Error al cargar las carreras. Intenta recargar la página.';
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
           this.careers = [];
         }
       });
@@ -275,11 +242,11 @@ export class StudentFormComponent implements OnInit {
     }
   }
 
-<<<<<<< HEAD
   onlyNumbers(e: Event): void {
     const input = e.target as HTMLInputElement;
     input.value = input.value.replace(/\D/g, '');
-=======
+  }
+
   validarCedula(): void {
     const cedula = this.form.cedula;
     this.cedulaError = '';
@@ -305,7 +272,6 @@ export class StudentFormComponent implements OnInit {
     if (digitoEsperado !== verificador) {
       this.cedulaError = 'La cédula no es válida según el algoritmo del Registro Civil Ecuador.';
     }
->>>>>>> 928668af292e6801ff09771a7a94d74221d87885
   }
 
   onFileSelected(event: any): void {
